@@ -1,1 +1,4 @@
 huggingface-hub
+langchain
+ctransformers
+llama-cpp-python
