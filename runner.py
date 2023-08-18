@@ -36,18 +36,18 @@ def get_cpp_lama(model_name, model_path, lang_chain=False):
     model_depend_args = {
         "Llama-2-70B-GGML": {"n_gqa": 8}
     }
+    context_size = 2048
     if not lang_chain:
         return Llama(
-            model_path=model_path, n_threads=7, n_ctx=1048,
+            model_path=model_path, n_threads=7, n_ctx=context_size,
             n_gpu_layers=1,  # Metal set to 1 is enough.
             n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
             **model_depend_args.get(model_name, {"use_mlock": True}),
         )
     return LlamaCpp(
-        model_path=model_path, n_threads=7, n_ctx=1048,
+        model_path=model_path, n_threads=7, n_ctx=context_size,
         n_gpu_layers=1,  # Metal set to 1 is enough.
         n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
-        temperture=0.2,
         **model_depend_args.get(model_name, {"use_mlock": True}),
     )
 

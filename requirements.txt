@@ -2,3 +2,6 @@ huggingface-hub
 langchain
 ctransformers
 llama-cpp-python
+chromadb
+bs4
+gpt4all
