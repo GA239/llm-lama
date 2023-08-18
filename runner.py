@@ -2,6 +2,7 @@ import os
 
 from ctransformers import AutoModelForCausalLM
 from llama_cpp import Llama
+from langchain.llms import LlamaCpp
 
 
 def get_local_model_path(model_name) -> str:
@@ -29,6 +30,26 @@ def with_ctransformers(m_name, model_file):
         # TODO: try with config
     )
     print(llm_ct('Q: Name the planets in the solar system? A:'))
+
+
+def get_cpp_lama(model_name, model_path, lang_chain=False):
+    model_depend_args = {
+        "Llama-2-70B-GGML": {"n_gqa": 8}
+    }
+    if not lang_chain:
+        return Llama(
+            model_path=model_path, n_threads=7, n_ctx=1048,
+            n_gpu_layers=1,  # Metal set to 1 is enough.
+            n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
+            **model_depend_args.get(model_name, {"use_mlock": True}),
+        )
+    return LlamaCpp(
+        model_path=model_path, n_threads=7, n_ctx=1048,
+        n_gpu_layers=1,  # Metal set to 1 is enough.
+        n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
+        temperture=0.2,
+        **model_depend_args.get(model_name, {"use_mlock": True}),
+    )
 
 
 def main():
@@ -61,17 +82,11 @@ def main():
 
     # # works
     model_path = os.path.join(get_local_model_path(m_name), model_file)
-    model_depend_args = {
-        "Llama-2-70B-GGML": {"n_gqa": 8}
-    }
-    llm = Llama(
-        model_path=model_path, n_threads=7, n_gpu_layers=1,
-        **model_depend_args.get(m_name, {"use_mlock": True}),
-    )
-    # output = llm("Q: Name the planets in the solar system? A: ", stop=["Q:", "\n"], echo=True)
-    # print(output)
-    output = llm("Q: Name the planets in the solar system? A: ", max_tokens=32, stop=["Q:", "\n"], echo=True)
+    llm = get_cpp_lama(m_name, model_path, lang_chain=True)
+    output = llm("Q: Name the planets in the solar system in order of the distance from the Sun? A: ", stop=["Q:", "\n"], echo=True)
     print(output)
+    # output = llm("Q: Name the planets in the solar system? A: ", max_tokens=32, stop=["Q:", "\n"], echo=True)
+    # print(output)
 
 
 if __name__ == "__main__":
