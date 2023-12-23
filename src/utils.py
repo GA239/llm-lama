@@ -1,5 +1,6 @@
-from huggingface_hub import snapshot_download
 import os
+
+from huggingface_hub import snapshot_download
 
 
 def download_model(repo_id, local_dir, **kwargs):
